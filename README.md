@@ -5,8 +5,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10+-blue?logo=python&logoColor=white">
-  <img src="https://img.shields.io/badge/pygame-2.x-green">
-  <img src="https://img.shields.io/badge/numpy-powered-orange?logo=numpy&logoColor=white">
+  <img src="https://img.shields.io/badge/PyQt-5-41CD52?logo=qt&logoColor=white">
+  <img src="https://img.shields.io/badge/weather-Open--Meteo-orange">
+  <img src="https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey">
 </p>
 
@@ -37,12 +38,12 @@ DayOS is a single place to organize your day. A desktop tool that consist of foc
 ## 💾 Where is my data?
 Everything is stored as plain JSON in a .dayos folder inside your home directory:
 
-your notes
-```bash
+Your notes:
+```text
 ~/.dayos/notes.json
 ```
-events, tasks and which reminders already rang
-```bash
+Events, tasks and which reminders already rang:
+```text
 ~/.dayos/planner.json
 ```
 

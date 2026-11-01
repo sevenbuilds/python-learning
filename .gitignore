@@ -2,4 +2,5 @@ python_learning/
 build/
 dist/
 __pycache__/
+*.pyc
 *.spec
