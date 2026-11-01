@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QHBoxLayout
 )
+# --- importing modules ----
 from PyQt5.QtCore import QTimer
 from pages.home import homepage
 from pages.focus import focuspage
@@ -28,7 +29,7 @@ class MainWindow(QMainWindow):
         screen = QApplication.primaryScreen()
         screen_geometry = screen.availableGeometry()
         width = int(screen_geometry.width() * 0.85)
-        height = int(screen_geometry.height() * 0.85)
+        height = int(screen_geometry.height() * 0.85) # only cover 85 percent of the screen
 
         self.resize(width, height)
         self.setMinimumSize(600, 400)
@@ -40,10 +41,8 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle(self.Name)
-
         central = QWidget()
         central.setObjectName("appRoot")
-
         layout = QHBoxLayout(central)
         layout.setContentsMargins(18, 18, 18, 18)
         layout.setSpacing(16)
@@ -73,7 +72,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(central)
 
-        #---- event ----
+        #---- events ----
         self.sidebar.buttons[0].clicked.connect(self.show_home)
         self.sidebar.buttons[1].clicked.connect(self.show_focus)
         self.sidebar.buttons[2].clicked.connect(self.show_weather)
@@ -87,7 +86,7 @@ class MainWindow(QMainWindow):
         self.home_page.calendar_card.clicked.connect(self.show_calendar)
         self.home_page.tasks_card.clicked.connect(self.show_tasks)
 
-        # update home page with information from the other pages
+        # ---- updating home pages -----
         self.weather_page.summary_changed.connect(
             self.home_page.weather_card.set_content
         )
@@ -95,23 +94,19 @@ class MainWindow(QMainWindow):
             self.home_page.notes_card.set_content
         )
 
-
         self.notes_page.emit_summary()
-
         self.data.changed.connect(self.update_planner_cards)
-
-        # update planner information every 30 seconds
+        #every 30000ms = 30s we update the info
         self.summary_timer = QTimer(self)
         self.summary_timer.timeout.connect(self.update_planner_cards)
         self.summary_timer.start(30000)
-
         self.update_planner_cards()
+        
         self.toasts = ToastHost(central)
-
         self.reminders = ReminderService(self.data)
         self.reminders.fired.connect(self.on_reminder)
 
-    #----page navigation -----
+    #----build page navigation -----
     def show_home(self):
         self.pages.setCurrentWidget(self.home_page)
         self.sidebar.set_active(0)

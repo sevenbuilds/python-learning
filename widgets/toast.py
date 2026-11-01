@@ -1,10 +1,8 @@
 from PyQt5.QtWidgets import QFrame, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt, QEvent, pyqtSignal
 
-
 class Toast(QFrame):
     dismissed = pyqtSignal(object)
-
     def __init__(self, title, body):
         super().__init__()
         self.setObjectName("toast")
@@ -20,9 +18,9 @@ class Toast(QFrame):
         close = QPushButton("✕")
         close.setObjectName("iconButton")
         close.setCursor(Qt.PointingHandCursor)
-        close.clicked.connect(lambda: self.dismissed.emit(self))
         top.addWidget(title_label, 1)
         top.addWidget(close, 0, Qt.AlignTop)
+        close.clicked.connect(self.close_toast)
 
         body_label = QLabel(body)
         body_label.setObjectName("mutedText")
@@ -30,6 +28,8 @@ class Toast(QFrame):
         vbox.addLayout(top)
         vbox.addWidget(body_label)
 
+        def close_toast(self):
+            self.dismissed.emit(self)
 
 class ToastHost(QWidget):
     """Floats in the bottom-right corner of its parent and stacks notifications."""

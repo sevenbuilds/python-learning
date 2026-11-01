@@ -6,26 +6,27 @@ class InfoCard(QFrame):
     clicked = pyqtSignal()
     def __init__(self, category, title, description, action):
         super().__init__()
-        self.setObjectName("infoCard")
-        self.setMinimumHeight(165)
-        self.setCursor(QCursor(Qt.PointingHandCursor))
         vbox = QVBoxLayout(self)
+        self.setMinimumHeight(165)
+        self.setObjectName("infoCard")
+        self.setCursor(QCursor(Qt.PointingHandCursor))
         vbox.setContentsMargins(20, 16, 20, 16)
         vbox.setSpacing(6)
         category_label = QLabel(category)
         category_label.setObjectName("cardCategory")
-        # kept as attributes so set_content() can change them later
+
         self.title_label = QLabel(title)
         self.title_label.setObjectName("cardTitle")
         self.title_label.setWordWrap(True)
+
         self.description_label = QLabel(description)
         self.description_label.setObjectName("mutedText")
         self.description_label.setWordWrap(True)
         self.description_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+
         action_label = QLabel(action)
         action_label.setObjectName("cardAction")
 
-        # top to bottom: category, title, description, (space), action
         vbox.addWidget(category_label)
         vbox.addWidget(self.title_label)
         vbox.addWidget(self.description_label, 1)

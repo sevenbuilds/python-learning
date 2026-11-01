@@ -1,22 +1,18 @@
 from datetime import date, datetime
-
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit, QDateEdit,
     QTimeEdit, QComboBox, QCheckBox, QPushButton, QLabel, QMessageBox,
 )
 from PyQt5.QtCore import Qt, QDate, QTime
-from services.planner_data import COLORS, REMINDER_OPTIONS, REPEAT_OPTIONS, PRIORITIES, new_id
-
+from services.planner_data import (COLORS, REMINDER_OPTIONS, REPEAT_OPTIONS, PRIORITIES, new_id)
 
 def to_qdate(d):
     return QDate(d.year, d.month, d.day)
-
 
 def fill_combo(combo, options, current):
     for label, value in options:
         combo.addItem(label, value)
     combo.setCurrentIndex(max(combo.findData(current), 0))
-
 
 def make_date_edit(d):
     edit = QDateEdit(to_qdate(d))
@@ -24,12 +20,10 @@ def make_date_edit(d):
     edit.setDisplayFormat("ddd, dd MMM yyyy")
     return edit
 
-
 def make_time_edit(text):
     edit = QTimeEdit(QTime.fromString(text, "HH:mm"))
     edit.setDisplayFormat("HH:mm")
     return edit
-
 
 def button_row(dialog, save_text, with_delete):
     row = QHBoxLayout()
@@ -51,17 +45,16 @@ def button_row(dialog, save_text, with_delete):
     row.addWidget(save)
     return row
 
-
 class EventDialog(QDialog):
     """Create/edit an event. An event without an end time works as a simple reminder."""
     def __init__(self, parent, event=None, day=None):
         super().__init__(parent)
-        ev = event or {}
-        self.setWindowTitle("Edit event" if event else "New event / reminder")
         self.setMinimumWidth(420)
-        self.event_id = ev.get("id") or new_id()
         self.result_event = None
         self.delete_requested = False
+        self.setWindowTitle("Edit event" if event else "New event / reminder")
+        ev = event or {}
+        self.event_id = ev.get("id") or new_id()
 
         base_day = date.fromisoformat(ev["date"]) if ev else (day or date.today())
         start_text = ev.get("start") or f"{min(datetime.now().hour + 1, 23):02d}:00"
@@ -76,6 +69,7 @@ class EventDialog(QDialog):
         self.end_edit = make_time_edit(end_text or start_text)
         self.end_edit.setEnabled(bool(end_text))
         self.end_check.toggled.connect(self.end_edit.setEnabled)
+
         self.repeat_combo = QComboBox()
         fill_combo(self.repeat_combo, REPEAT_OPTIONS, ev.get("repeat", "none"))
         self.remind_combo = QComboBox()
@@ -89,6 +83,7 @@ class EventDialog(QDialog):
 
         form = QFormLayout()
         form.setSpacing(12)
+        
         form.addRow("Title", self.title_edit)
         form.addRow("Date", self.date_edit)
         form.addRow("Starts", self.start_edit)
@@ -129,7 +124,6 @@ class EventDialog(QDialog):
             "color": self.color_combo.currentData(),
         }
         self.accept()
-
 
 class TaskDialog(QDialog):
     def __init__(self, parent, task=None, title="", day=None):

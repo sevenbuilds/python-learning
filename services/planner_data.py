@@ -80,7 +80,6 @@ class PlannerData(QObject):
         except FileNotFoundError:
             pass
         except (json.JSONDecodeError, AttributeError):
-            # keep a copy of the damaged file
             backup = DATA_FILE + ".corrupt"
             os.replace(DATA_FILE, backup)
 
@@ -214,63 +213,48 @@ class PlannerData(QObject):
 
     def count_on(self, day):
         return len(self.items_on(day))
-
-    def due_reminders(self, now):
-        found = []
-        for event in self.events:
-            minutes = event.get("remind", -1)
-            if minutes < 0:
-                continue
-            for offset in range(-1, 3):
-                day = now.date() + timedelta(days=offset)
-                if not self.occurs_on(event, day):
-                    continue
-                start = datetime.combine(
-                    day,
-                    parse_time(event["start"])
-                )
-                trigger = start - timedelta(minutes=minutes)
-                key = f"e:{event['id']}:{day.isoformat()}"
-                if trigger <= now <= start + timedelta(minutes=30) and key not in self.fired:
-                    found.append((
-                        key,
-                        "🔔 " + event["title"],
-                        describe_when(start, now)
-                    ))
-                    
-        for task in self.tasks:
-            minutes = task.get("remind", -1)
-            if task.get("done") or minutes < 0 or not task.get("due"):
-                continue
-            if task.get("time"):
-                task_time = parse_time(task["time"])
-            else:
-                task_time = time(9, 0)
-            due_date = datetime.combine(
-                date.fromisoformat(task["due"]),
-                task_time
-            )
-            trigger = due_date - timedelta(minutes=minutes)
-            key = f"t:{task['id']}:{task['due']}:{task_time:%H:%M}"
-            if trigger <= now <= due_date + timedelta(minutes=30) and key not in self.fired:
-                found.append((
-                    key,
-                    "☑ " + task["title"],
-                    "Task due · " + describe_when(due_date, now)
-                ))
-        return found
-
+    
     def mark_fired(self, key):
-        now = datetime.now()
-        self.fired[key] = now.isoformat(timespec="seconds")
+            now = datetime.now()
+            self.fired[key] = now.isoformat(timespec="seconds")
+    
+            #---- remove old reminder keys ----
+            cutoff = now - timedelta(days=3)
+            self.fired = {
+                k: v for k, v in self.fired.items()
+                if datetime.fromisoformat(v) > cutoff
+            }
+            self.save()
 
-        #---- remove old reminder keys ----
-        cutoff = now - timedelta(days=3)
-        self.fired = {
-            k: v for k, v in self.fired.items()
-            if datetime.fromisoformat(v) > cutoff
-        }
-        self.save()
+    def tasks_summary(self, today):
+            if not self.tasks:
+                return "No tasks yet", "Capture what you need to get done."
+            open_tasks = [
+                task for task in self.tasks
+                if not task.get("done")
+            ]
+            if not open_tasks:
+                return "All done 🎉", "Every task is checked off."
+    
+            today_string = today.isoformat()
+    
+            due_today = sum(
+                1 for task in open_tasks
+                if task.get("due") == today_string
+            )
+            overdue = sum(
+                1 for task in open_tasks
+                if task.get("due") and task["due"] < today_string
+            )
+            parts = [f"{due_today} due today"]
+            if overdue:
+                parts.append(f"{overdue} overdue")
+    
+            count = len(open_tasks)
+            return (
+                f"{count} open task{'s' if count != 1 else ''}",
+                " · ".join(parts)
+            )
 
     def next_up(self, now):
         best = None
@@ -302,32 +286,48 @@ class PlannerData(QObject):
             )
         return best[1], describe_when(best[0], now)
 
-    def tasks_summary(self, today):
-        if not self.tasks:
-            return "No tasks yet", "Capture what you need to get done."
-        open_tasks = [
-            task for task in self.tasks
-            if not task.get("done")
-        ]
-        if not open_tasks:
-            return "All done 🎉", "Every task is checked off."
+    def due_reminders(self, now):
+            found = []
+            for event in self.events:
+                minutes = event.get("remind", -1)
+                if minutes < 0:
+                    continue
+                for offset in range(-1, 3):
+                    day = now.date() + timedelta(days=offset)
+                    if not self.occurs_on(event, day):
+                        continue
+                    start = datetime.combine(
+                        day,
+                        parse_time(event["start"])
+                    )
+                    trigger = start - timedelta(minutes=minutes)
+                    key = f"e:{event['id']}:{day.isoformat()}"
+                    if trigger <= now <= start + timedelta(minutes=30) and key not in self.fired:
+                        found.append((
+                            key,
+                            "🔔 " + event["title"],
+                            describe_when(start, now)
+                        ))
+                        
+            for task in self.tasks:
+                minutes = task.get("remind", -1)
+                if task.get("done") or minutes < 0 or not task.get("due"):
+                    continue
+                if task.get("time"):
+                    task_time = parse_time(task["time"])
+                else:
+                    task_time = time(9, 0)
+                due_date = datetime.combine(
+                    date.fromisoformat(task["due"]),
+                    task_time
+                )
+                trigger = due_date - timedelta(minutes=minutes)
+                key = f"t:{task['id']}:{task['due']}:{task_time:%H:%M}"
+                if trigger <= now <= due_date + timedelta(minutes=30) and key not in self.fired:
+                    found.append((
+                        key,
+                        "☑ " + task["title"],
+                        "Task due · " + describe_when(due_date, now)
+                    ))
+            return found
 
-        today_string = today.isoformat()
-
-        due_today = sum(
-            1 for task in open_tasks
-            if task.get("due") == today_string
-        )
-        overdue = sum(
-            1 for task in open_tasks
-            if task.get("due") and task["due"] < today_string
-        )
-        parts = [f"{due_today} due today"]
-        if overdue:
-            parts.append(f"{overdue} overdue")
-
-        count = len(open_tasks)
-        return (
-            f"{count} open task{'s' if count != 1 else ''}",
-            " · ".join(parts)
-        )

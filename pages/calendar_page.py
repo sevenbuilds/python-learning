@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QFrame, QSizePolicy, QDialog, QMessageBox,
@@ -8,9 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from widgets.helpers import clear_layout, make_scroll, repolish
 from widgets.planner_dialogs import EventDialog, TaskDialog
 
-
 class DayCell(QPushButton):
-    """One square in the month grid."""
     def __init__(self):
         super().__init__()
         self.setObjectName("dayCell")
@@ -27,7 +24,6 @@ class DayCell(QPushButton):
         self.setProperty("otherMonth", other_month)
         repolish(self)
 
-
 class ScheduleRow(QFrame):
     """One line in the selected day's schedule (an event or a task)."""
     edit_requested = pyqtSignal(str, str)      # kind, id
@@ -42,7 +38,6 @@ class ScheduleRow(QFrame):
         row = QHBoxLayout(self)
         row.setContentsMargins(12, 10, 8, 10)
         row.setSpacing(10)
-
         if self.kind == "event":
             bar = QFrame()
             bar.setFixedWidth(4)
@@ -90,7 +85,6 @@ class ScheduleRow(QFrame):
         remove.clicked.connect(lambda: self.delete_requested.emit(self.kind, self.item_id))
         row.addWidget(edit)
         row.addWidget(remove)
-
 
 class calendarpage(QWidget):
     def __init__(self, data):
@@ -142,9 +136,9 @@ class calendarpage(QWidget):
         for button in (prev_button, next_button, today_button):
             button.setObjectName("smallButton")
             button.setCursor(Qt.PointingHandCursor)
-        prev_button.clicked.connect(lambda: self.shift_month(-1))
-        next_button.clicked.connect(lambda: self.shift_month(1))
-        today_button.clicked.connect(lambda: self.select_day(date.today()))
+        prev_button.clicked.connect(self.previous_month)
+        next_button.clicked.connect(self.next_month)
+        today_button.clicked.connect(self.go_to_today)
         self.month_label = QLabel()
         self.month_label.setObjectName("monthLabel")
         nav.addWidget(self.month_label)
@@ -153,7 +147,6 @@ class calendarpage(QWidget):
         nav.addWidget(today_button)
         nav.addWidget(next_button)
         left_layout.addLayout(nav)
-
         grid = QGridLayout()
         grid.setSpacing(6)
         for col, name in enumerate(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]):
@@ -201,7 +194,13 @@ class calendarpage(QWidget):
         self.data.changed.connect(self.refresh)
         self.refresh()
 
-    # ------------------------------------------------------------------
+    def previous_month(self):
+        self.shift_month(-1)
+    def next_month(self):
+        self.shift_month(1)
+    def go_to_today(self):
+        self.select_day(date.today())
+
     def refresh(self):
         self.refresh_grid()
         self.refresh_day()
@@ -250,7 +249,6 @@ class calendarpage(QWidget):
         self.month = day.replace(day=1)
         self.refresh()
 
-    # ---- actions ----
     def add_event(self):
         dialog = EventDialog(self, day=self.selected)
         if dialog.exec_() == QDialog.Accepted and dialog.result_event:

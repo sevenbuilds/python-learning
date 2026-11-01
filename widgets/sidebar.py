@@ -26,7 +26,6 @@ class Sidebar(QFrame):
         vbox.addWidget(sidebarCaption)
         vbox.addSpacing(28)
 
-        # index: 0 Home, 1 Focus, 2 Weather, 3 Calendar, 4 Tasks, 5 Notes
         self.buttons = []
         options = ["⌂   Home", "◷   Focus", "☼   Weather", "▤   Calendar", "☑   Tasks", "✎   Notes"]
         for name in options:
