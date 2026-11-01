@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Spring-mass simulation demo" width="800" height="600">
+  <img src="assets/demo.gif" alt="Day0S in action." width="800" height="600">
 </p>
 
 ---
@@ -54,11 +54,11 @@ Weather uses free services that need no account or API key:
 ## 🚀 How to run:
 **Option 1**: Download the Executable (**Recommended**)
 1. Go to [Releases](https://github.com/sevenbuilds/Terra_Projects/releases/tag/v1.0.0) page.
-2. Download SpringMass.exe from the lastest release.
-3. Double-click the downloaded file so launch the simulation.
+2. Download DayOS.exe from the lastest release.
+3. Double-click the downloaded file so launch the app.
 4. If faced with "**Windows protection**" click **more info**.
 5. choose the option "**Run anyway**".
-6. Enjoy the simulation!
+6. Enjoy the app!
 ---
 **Option 2**: Run from source
 if you want to run or modify the code:
@@ -66,19 +66,19 @@ if you want to run or modify the code:
 
 Install the dependencies:
 ```bash
-pip install pygame-ce numpy
+pip install PyQt5
 ```
 Clone the repository:
 ```bash
-git clone https://github.com/sevenbuilds/Terra_Projects.git
+git clone https://github.com/sevenbuilds/python-learning
 ```
 Navigate to the project directory:
 ```bash
-cd Terra_Projects
+cd python-learning
 ```
 Run the simulation:
 ```bash
-python Simulation.py
+python main.py
 ```
 
 ## 📄 License
